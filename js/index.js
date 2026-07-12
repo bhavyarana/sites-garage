@@ -1,90 +1,80 @@
-const mobile_nav = document.querySelector(".navbar-icon-btn");
-const nav_header = document.querySelector(".navbar");
+// ---------- mobile nav toggle ----------
+const mobileNavBtn = document.querySelector(".navbar-icon-btn");
+const navbar = document.querySelector(".navbar");
 
-const toggleNavbar = () => {
-  nav_header.classList.toggle("active");
-};
-
-mobile_nav.addEventListener("click", () => toggleNavbar());
-
-
-//navbar scroll
-
-let navbar=document.querySelector(".navbar");
-let topBtn = document.querySelector(".top-btn");
-
-window.addEventListener("scroll", function(){
-  if(scrollY>=200){
-    navbar.classList.add("active1");
-    topBtn.classList.add("active-btn-top");
-  }
-  else{
-    navbar.classList.remove("active1");
-    topBtn.classList.remove("active-btn-top");
-  }
+mobileNavBtn.addEventListener("click", () => {
+  navbar.classList.toggle("active");
 });
 
-// scroll down icon
-
-let scrollDownIcon=document.querySelector(".home-section-right i");
-
-window.addEventListener("scroll", function(){
-  if(scrollY>=200){
-    scrollDownIcon.style.display="none";
-  }
-  else{
-    scrollDownIcon.style.display="inline-block";
-  }
+// close mobile menu when a link is clicked
+document.querySelectorAll(".navbar-links").forEach((link) => {
+  link.addEventListener("click", () => navbar.classList.remove("active"));
 });
 
+// ---------- navbar style + top button on scroll ----------
+const topBtn = document.querySelector(".top-btn");
 
+window.addEventListener("scroll", () => {
+  navbar.classList.toggle("active1", window.scrollY >= 80);
+  topBtn.classList.toggle("active-btn-top", window.scrollY >= 400);
+});
 
-//swiper code
-// var swiper = new Swiper(".mySwiper", {
-//   slidesPerView: 3,
-//   spaceBetween: 20,
-//   loop:true,
-//   autoplay:{
-//     delay:3000,
-//   },
-//   pagination: {
-//     el: ".swiper-pagination",
-//     clickable: true,
-//   },
-// });
-
-//media query
-//swiper code
-function myFunction(x) {
-  if (x.matches) { // If media query matches
-    var swiper = new Swiper(".mySwiper", {
-      slidesPerView: 2,
-      spaceBetween: 20,
-      loop:true,
-      autoplay:{
-        delay:3000,
-      },
-      pagination: {
-        el: ".swiper-pagination",
-        clickable: true,
-      },
+// ---------- scroll reveal ----------
+const revealObserver = new IntersectionObserver(
+  (entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add("visible");
+        revealObserver.unobserve(entry.target);
+      }
     });
-  } else {
-    var swiper = new Swiper(".mySwiper", {
-      slidesPerView: 3,
-      spaceBetween: 20,
-      loop:true,
-      autoplay:{
-        delay:3000,
-      },
-      pagination: {
-        el: ".swiper-pagination",
-        clickable: true,
-      },
-    });
-  }
-}
+  },
+  { threshold: 0.15 }
+);
 
-var x = window.matchMedia("(max-width: 1250px)")
-myFunction(x) // Call listener function at run time
-x.addListener(myFunction) // Attach listener function on state changes
+document.querySelectorAll(".reveal").forEach((el) => revealObserver.observe(el));
+
+// ---------- animated counters ----------
+const counterObserver = new IntersectionObserver(
+  (entries) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return;
+      const el = entry.target;
+      counterObserver.unobserve(el);
+
+      const target = +el.dataset.target;
+      const duration = 1600;
+      const start = performance.now();
+
+      const tick = (now) => {
+        const progress = Math.min((now - start) / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+        el.textContent = Math.round(target * eased).toLocaleString();
+        if (progress < 1) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    });
+  },
+  { threshold: 0.6 }
+);
+
+document.querySelectorAll(".counter").forEach((el) => counterObserver.observe(el));
+
+// ---------- testimonials carousel ----------
+new Swiper(".mySwiper", {
+  slidesPerView: 1,
+  spaceBetween: 24,
+  loop: true,
+  autoplay: {
+    delay: 3500,
+    pauseOnMouseEnter: true,
+  },
+  pagination: {
+    el: ".swiper-pagination",
+    clickable: true,
+  },
+  breakpoints: {
+    700: { slidesPerView: 2 },
+    1100: { slidesPerView: 3 },
+  },
+});
